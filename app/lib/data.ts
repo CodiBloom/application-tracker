@@ -55,3 +55,9 @@ export async function fetchFilteredJobs(
         throw new Error("Failed to fetch jobs.");
     }
 }
+
+// export async function fetchJobs() {
+//     try {
+//         const jobs = await sql
+//     }
+// };
