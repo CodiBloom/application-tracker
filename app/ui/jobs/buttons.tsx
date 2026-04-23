@@ -15,6 +15,7 @@ export function AddJob() {
 }
 
 export function UpdateJob({ id }: { id: string }) {
+    console.log("INSIDE UPDATE JOB:", id);
     return (
         <Link
             href={`/dashboard/jobs/${id}/edit`}

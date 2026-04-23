@@ -34,7 +34,7 @@ export function BarChart({ data }: ChartProps) {
                 label: "Application Status",
                 data: Object.values(status),
                 backgroundColor: [
-                    "rgba(255,99,132, 0.2)",
+                    "rgba(255, 99, 132, 0.2)",
                     "rgba(54, 162, 235, 0.2)",
                     "rgba(255, 206, 86, 0.2)",
                     "rgba(75, 192, 192, 0.2)",
@@ -49,7 +49,7 @@ export function BarChart({ data }: ChartProps) {
                     "rgba(153, 102, 255, 1)",
                     "rgba(255, 159, 64, 1)",
                 ],
-                borderWidth: 1,
+                borderWidth: 2,
             },
         ],
     };

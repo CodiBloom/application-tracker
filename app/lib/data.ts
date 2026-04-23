@@ -1,5 +1,5 @@
 import sql from "./db";
-import { Job, JobsTable } from "./definitions";
+import { Job } from "./definitions";
 
 
 export async function fetchApplications() {
@@ -40,7 +40,7 @@ export async function fetchFilteredJobs(
     const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
     try {
-        const jobs = await sql<JobsTable[]>`
+        const jobs = await sql<Job[]>`
             SELECT *
             FROM jobs
             WHERE
@@ -48,6 +48,8 @@ export async function fetchFilteredJobs(
                 job_title ILIKE ${`%${query}%`} OR
                 notes ILIKE ${`%${query}%`}
         `;
+
+        console.log(jobs);
 
         return jobs;
     } catch (error) {
@@ -61,3 +63,17 @@ export async function fetchFilteredJobs(
 //         const jobs = await sql
 //     }
 // };
+
+export async function fetchJobById(id: string) {
+    try {
+        const job = await sql<Job[]>`
+            SELECT *
+            FROM jobs
+            WHERE id = ${id}
+        `
+        return job[0];
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch job.");
+    }
+}

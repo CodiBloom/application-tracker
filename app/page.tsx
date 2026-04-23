@@ -9,7 +9,7 @@ export default function Home() {
         </div>
         <div className="text-base font-medium sm:flex-row w-full grid grid-cols-3">
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] w-full col-start-2"
+            className="flex h-12 w-full items-center bg-gray-800 justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] w-full col-start-2"
             href="/dashboard"
           >
             Go to dashboard
