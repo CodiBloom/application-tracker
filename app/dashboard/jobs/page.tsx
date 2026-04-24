@@ -1,8 +1,8 @@
-import Pagination from "@/app/ui/jobs/pagination";
+import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
 import Table from "@/app/ui/jobs/table";
 import { fetchJobsPages } from "@/app/lib/data";
-import {JobsTableSkeleton } from "@/app/ui/skeletons";
+import { JobsTableSkeleton } from "@/app/ui/skeletons";
 import { Suspense } from "react";
 import { AddJob } from "@/app/ui/jobs/buttons";
 

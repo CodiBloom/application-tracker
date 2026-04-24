@@ -1,6 +1,8 @@
 import sql from "./db";
-import { Job } from "./definitions";
+import { Job, Contact } from "./definitions";
 
+const JOBS_ITEMS_PER_PAGE = 6;
+const CONTACTS_ITEMS_PER_PAGE=10;
 
 export async function fetchApplications() {
     try {
@@ -10,12 +12,10 @@ export async function fetchApplications() {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch revenue data.");
     }
-}
+};
 
-const ITEMS_PER_PAGE = 6;
 export async function fetchJobsPages(query: string | number) {
     try {
-
         const jobs = await sql`SELECT COUNT(*)
         FROM jobs
         WHERE
@@ -24,20 +24,19 @@ export async function fetchJobsPages(query: string | number) {
             notes ILIKE ${`%${query}%`}
         `;
 
-        const totalPages = Math.ceil(Number(jobs[0].count) / ITEMS_PER_PAGE);
+        const totalPages = Math.ceil(Number(jobs[0].count) / JOBS_ITEMS_PER_PAGE);
         return totalPages;
-
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch total number of jobs.");
     }
-}
+};
 
 export async function fetchFilteredJobs(
     query: string,
     currentPage: number,
 ) {
-    const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+    const offset = (currentPage - 1) * JOBS_ITEMS_PER_PAGE;
 
     try {
         const jobs = await sql<Job[]>`
@@ -47,22 +46,16 @@ export async function fetchFilteredJobs(
                 company_name ILIKE ${`%${query}%`} OR
                 job_title ILIKE ${`%${query}%`} OR
                 notes ILIKE ${`%${query}%`}
+            ORDER BY last_updated DESC
+            LIMIT ${JOBS_ITEMS_PER_PAGE} OFFSET ${offset}
         `;
-
-        console.log(jobs);
 
         return jobs;
     } catch (error) {
         console.error("Data Error:", error);
         throw new Error("Failed to fetch jobs.");
     }
-}
-
-// export async function fetchJobs() {
-//     try {
-//         const jobs = await sql
-//     }
-// };
+};
 
 export async function fetchJobById(id: string) {
     try {
@@ -76,4 +69,44 @@ export async function fetchJobById(id: string) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch job.");
     }
-}
+};
+
+export async function fetchFilteredContacts(
+    query: string,
+    currentPage: number,
+) {
+    const offset = (currentPage - 1) * CONTACTS_ITEMS_PER_PAGE;
+
+    try {
+        const contacts = await sql<Contact[]>`
+            SELECT *
+            FROM contacts
+            WHERE
+                contact_name ILIKE ${`%${query}%`} OR
+                contact_email ILIKE ${`%${query}%`}
+            LIMIT ${CONTACTS_ITEMS_PER_PAGE} OFFSET ${offset}
+        `;
+
+        return contacts;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch contacts.");
+    }
+};
+
+export async function fetchContactsPages(query: string | number) {
+    try {
+        const jobs = await sql`SELECT COUNT(*)
+        FROM contacts
+        WHERE
+            contact_name ILIKE ${`%${query}%`} OR
+            contact_email ILIKE ${`%${query}%`}
+        `;
+
+        const totalPages = Math.ceil(Number(jobs[0].count) / JOBS_ITEMS_PER_PAGE);
+        return totalPages;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch total number of jobs.");
+    }
+};

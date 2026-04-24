@@ -1,21 +1,20 @@
-import Form from "@/app/ui/jobs/add-form";
+import Form from "@/app/ui/contacts/add-form";
 import Breadcrumbs from "@/app/ui/breadcrumbs";
 
 export default async function Page() {
-
     return (
         <main>
             <Breadcrumbs
                 breadcrumbs={[
-                    { label: "Jobs", href: "/dashboard/jobs" },
+                    { label: "Contacts", href: "/dashboard/contacts" },
                     {
-                        label: "Add Job",
-                        href: "/dashboard/jobs/add",
+                        label: "Add Contact",
+                        href: "/dashboard/contacts/add",
                         active: true
                     },
                 ]}
             />
             <Form />
         </main>
-    );
+    )
 }

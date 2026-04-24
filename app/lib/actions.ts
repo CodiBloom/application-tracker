@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import sql from "@/app/lib/db";
 
-const FormSchema = z.object({
+// ------------- JOB ACTIONS -------------------
+
+const JobFormSchema = z.object({
     id: z.string(),
     company_name: z.string().min(1, { message: "Please enter a company name." }),
     job_title: z.string().min(1, { message: "Please enter a job title." }),
@@ -19,10 +21,10 @@ const FormSchema = z.object({
     last_updated: z.date(),
 });
 
-const AddJob = FormSchema.omit({ id: true, last_updated: true });
-const UpdateJob = FormSchema.omit({ id: true, applied_on: true, last_updated: true });
+const AddJob = JobFormSchema.omit({ id: true, last_updated: true });
+const UpdateJob = JobFormSchema.omit({ id: true, applied_on: true, last_updated: true });
 
-export type State = {
+export type JobState = {
     errors?: {
         company_name?: string;
         job_title?: string;
@@ -37,7 +39,7 @@ export type State = {
     message?: string | null;
 };
 
-export async function addJob(prevState: State, formData: FormData) {
+export async function addJob(prevState: JobState, formData: FormData) {
     const validatedFields = AddJob.safeParse({
         company_name: formData.get("company_name"),
         job_title: formData.get("job_title"),
@@ -86,9 +88,9 @@ export async function addJob(prevState: State, formData: FormData) {
 
     revalidatePath("/dashboard/jobs");
     redirect("/dashboard/jobs");
-}
+};
 
-export async function updateJob(id: string, prevState: State, formData: FormData) {
+export async function updateJob(id: string, prevState: JobState, formData: FormData) {
     const validatedFields = UpdateJob.safeParse({
         company_name: formData.get("company_name"),
         job_title: formData.get("job_title"),
@@ -134,7 +136,7 @@ export async function updateJob(id: string, prevState: State, formData: FormData
 
     revalidatePath("/dashboard/jobs");
     redirect("/dashboard/jobs");
-}
+};
 
 export async function deleteJob (id: string, formData: FormData) {
     try {
@@ -146,4 +148,110 @@ export async function deleteJob (id: string, formData: FormData) {
         };
     }
     revalidatePath("/dashboard/jobs");
-}
+};
+
+// ------------- CONTACT ACTIONS -------------------
+
+const ContactFormSchema = z.object({
+    id: z.string(),
+    contact_name: z.string().min(1, { message: "Please enter a contact name." }),
+    contact_phone: z.string(),
+    contact_email: z.string()
+});
+
+const AddContact = ContactFormSchema.omit({ id: true });
+const UpdateContact = ContactFormSchema.omit({ id: true });
+
+export type ContactState = {
+    errors?: {
+        contact_name?: string;
+        contact_phone?: string;
+        contact_email?: string
+    };
+    message?: string | null;
+};
+
+export async function addContact(prevState: ContactState, formData: FormData) {
+    const validatedFields = AddContact.safeParse({
+        contact_name: formData.get("contact_name"),
+        contact_phone: formData.get("contact_phone"),
+        contact_email: formData.get("contact_email")
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: "Missing Fields. Failed to Add Contact.",
+        };
+    }
+
+    const {
+        contact_name,
+        contact_phone,
+        contact_email,
+    } = validatedFields.data;
+
+    try {
+        await sql`
+            INSERT INTO contacts (contact_name, contact_phone, contact_email)
+            VALUES(${contact_name}, ${contact_phone}, ${contact_email})
+        `;
+    } catch (error) {
+        console.error("Database Error:", error);
+        return {
+            message: "Database Error: Failed to Add Contact.",
+        };
+    }
+
+    revalidatePath("/dashboard/contacts");
+    redirect("/dashboard/contacts");
+};
+
+export async function updateContact(id: string, prevState: ContactState, formData: FormData) {
+    const validatedFields = UpdateContact.safeParse({
+        contact_name: formData.get("contact_name"),
+        contact_phone: formData.get("contact_phone"),
+        contact_email: formData.get("contact_email")
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: "Missing Fields. Failed to Update Contact.",
+        };
+    }
+
+    const {
+        contact_name,
+        contact_phone,
+        contact_email,
+    } = validatedFields.data;
+
+    try {
+        await sql`
+            UPDATE contacts
+            SET contact_name=${contact_name}, contact_phone=${contact_phone}, contact_email=${contact_email}
+            WHERE id = ${id}
+        `;
+    } catch (error) {
+        console.error("Database Error:", error);
+        return {
+            message: "Database Error: Failed to Update Contact.",
+        };
+    }
+
+    revalidatePath("/dashboard/contacts");
+    redirect("/dashboard/contacts");
+};
+
+export async function deleteContact (id: string, formData: FormData) {
+    try {
+        await sql`DELETE FROM contacts WHERE id = ${id}`;
+    } catch (error) {
+        console.error(error)
+        return {
+            message: "Database Error: Failed to delete contact.",
+        };
+    }
+    revalidatePath("/dashboard/contacts");
+};
