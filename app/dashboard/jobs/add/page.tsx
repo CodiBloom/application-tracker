@@ -11,7 +11,7 @@ export default async function Page() {
                     {
                         label: "Add Job",
                         href: "/dashboard/jobs/add",
-                        active: true
+                        active: true,
                     },
                 ]}
             />

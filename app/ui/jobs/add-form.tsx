@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { BuildingOfficeIcon, ClipboardDocumentListIcon, PencilSquareIcon, WindowIcon, ArrowTrendingDownIcon, ArrowTrendingUpIcon, DocumentCheckIcon, XCircleIcon, ClockIcon, UserCircleIcon, CurrencyDollarIcon, BookOpenIcon, CalendarIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/app/ui/button";
-import { addJob, State } from "@/app/lib/actions";
+import { addJob, JobState } from "@/app/lib/actions";
 import { useActionState } from "react";
 import { Basic } from "@/app/ui/jobs/datepicker";
 
 export default function Form() {
-    const initialState: State = { message: null, errors: {} };
+    const initialState: JobState = { message: null, errors: {} };
     const [state, formAction] = useActionState(addJob, initialState);
 
     return (

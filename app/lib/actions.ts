@@ -71,7 +71,7 @@ export async function addJob(prevState: JobState, formData: FormData) {
         applied_on,
     } = validatedFields.data;
     const appliedOnArr = applied_on.split("/");
-    const applied_on_final = new Date(Number(appliedOnArr[0]), Number(appliedOnArr[1]), Number(appliedOnArr[2])).toISOString().split("T")[0];
+    const applied_on_final = new Date(Number(appliedOnArr[0]), Number(appliedOnArr[1]) - 1, Number(appliedOnArr[2])).toISOString().split("T")[0];
     const last_updated = new Date().toISOString();
 
     try {
@@ -166,7 +166,7 @@ export type ContactState = {
     errors?: {
         contact_name?: string;
         contact_phone?: string;
-        contact_email?: string
+        contact_email?: string;
     };
     message?: string | null;
 };
@@ -254,4 +254,88 @@ export async function deleteContact (id: string, formData: FormData) {
         };
     }
     revalidatePath("/dashboard/contacts");
+};
+
+// ------------- INTERVIEW ACTIONS -------------------
+
+const InterviewFormSchema = z.object({
+    id: z.string(),
+    interview_date: z.string().min(1, { message: "Please enter a date." }),
+    interview_time: z.string().min(1, { message: "Please enter a time." }),
+    job: z.coerce.number(),
+    interview_status: z.enum(["upcoming", "past", "cancelled"], { error: "Please select a status" }),
+    notes: z.string(),
+});
+
+const AddInterview = InterviewFormSchema.omit({ id: true });
+// const UpdateInterview = ContactFormSchema.omit({ id: true });
+
+export type InterviewState = {
+    errors?: {
+        interview_date?: string;
+        interview_time?: string,
+        job?: number;
+        interview_status?: string;
+    };
+    message?: string | null;
+};
+
+export async function addInterview(prevState: InterviewState, formData: FormData) {
+    console.log(formData);
+    const validatedFields = AddInterview.safeParse({
+        interview_date: formData.get("interview_date"),
+        interview_time: formData.get("interview_time"),
+        job: formData.get("job.id"),
+        interview_status: formData.get("interview_status"),
+        notes: formData.get("notes"),
+    });
+
+    if (!validatedFields.success) {
+        console.log(validatedFields.error.flatten().fieldErrors);
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: "Missing Fields. Failed to Add Interview.",
+        };
+    }
+
+    const {
+        interview_date,
+        interview_time,
+        job,
+        interview_status,
+        notes,
+    } = validatedFields.data;
+    const dateArr = interview_date.split("/");
+    const timeArr = interview_time.split(":");
+    const tempDate = new Date(Number(dateArr[0]), Number(dateArr[1]) - 1, Number(dateArr[2]), Number(timeArr[0]), Number(timeArr[1]));
+    const interview_date_final = tempDate.toISOString().split("T")[0];
+    const interview_time_final = tempDate.toISOString().split("T")[1];
+
+
+    try {
+        await sql`
+            INSERT INTO interviews (interview_date, interview_time, job, interview_status, notes)
+            VALUES(${interview_date_final}, ${interview_time_final}, ${job}, ${interview_status}, ${notes})
+        `;
+    } catch (error) {
+        console.error("Database Error:", error);
+        return {
+            message: "Database Error: Failed to Add Interview.",
+        };
+    }
+
+    revalidatePath("/dashboard/interviews");
+    redirect("/dashboard/interviews");
+};
+
+export async function deleteInterview (id: string, formData: FormData) {
+    try {
+        await sql`DELETE FROM interviews WHERE id = ${id}`;
+    } catch (error) {
+        console.error(error)
+        return {
+            message: "Database Error: Failed to delete interview.",
+        };
+    }
+    revalidatePath("/dashboard/interviews");
 };
