@@ -1,8 +1,15 @@
 import sql from "./db";
-import { Job, Contact } from "./definitions";
+import {
+    Job,
+    JobsTable,
+    Contact,
+    InterviewsTable,
+    InterviewJob
+} from "./definitions";
 
 const JOBS_ITEMS_PER_PAGE = 6;
 const CONTACTS_ITEMS_PER_PAGE=10;
+const INTERVIEWS_ITEMS_PER_PAGE=20;
 
 export async function fetchApplications() {
     try {
@@ -16,15 +23,16 @@ export async function fetchApplications() {
 
 export async function fetchJobsPages(query: string | number) {
     try {
-        const jobs = await sql`SELECT COUNT(*)
-        FROM jobs
-        WHERE
-            company_name ILIKE ${`%${query}%`} OR
-            job_title ILIKE ${`%${query}%`} OR
-            notes ILIKE ${`%${query}%`}
+        const data = await sql`
+            SELECT COUNT(*)
+            FROM jobs
+            WHERE
+                company_name ILIKE ${`%${query}%`} OR
+                job_title ILIKE ${`%${query}%`} OR
+                notes ILIKE ${`%${query}%`}
         `;
 
-        const totalPages = Math.ceil(Number(jobs[0].count) / JOBS_ITEMS_PER_PAGE);
+        const totalPages = Math.ceil(Number(data[0].count) / JOBS_ITEMS_PER_PAGE);
         return totalPages;
     } catch (error) {
         console.error("Database Error:", error);
@@ -39,8 +47,14 @@ export async function fetchFilteredJobs(
     const offset = (currentPage - 1) * JOBS_ITEMS_PER_PAGE;
 
     try {
-        const jobs = await sql<Job[]>`
-            SELECT *
+        const jobs = await sql<JobsTable[]>`
+            SELECT
+                id,
+                company_name,
+                job_title,
+                status,
+                applied_on,
+                last_updated
             FROM jobs
             WHERE
                 company_name ILIKE ${`%${query}%`} OR
@@ -96,17 +110,83 @@ export async function fetchFilteredContacts(
 
 export async function fetchContactsPages(query: string | number) {
     try {
-        const jobs = await sql`SELECT COUNT(*)
-        FROM contacts
-        WHERE
-            contact_name ILIKE ${`%${query}%`} OR
-            contact_email ILIKE ${`%${query}%`}
+        const data = await sql`
+            SELECT COUNT(*)
+            FROM contacts
+            WHERE
+                contact_name ILIKE ${`%${query}%`} OR
+                contact_email ILIKE ${`%${query}%`}
         `;
 
-        const totalPages = Math.ceil(Number(jobs[0].count) / JOBS_ITEMS_PER_PAGE);
+        const totalPages = Math.ceil(Number(data[0].count) / CONTACTS_ITEMS_PER_PAGE);
         return totalPages;
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch total number of jobs.");
+    }
+};
+
+export async function fetchFilteredInterviews (
+    query: string,
+    currentPage: number,
+) {
+    const offset = (currentPage - 1) * INTERVIEWS_ITEMS_PER_PAGE;
+
+    try {
+        const interviews = await sql<InterviewsTable[]>`
+            SELECT
+                interviews.id,
+                interviews.interview_date,
+                interviews.interview_time,
+                interviews.interview_status,
+                jobs.company_name,
+                jobs.job_title
+            FROM interviews
+            JOIN jobs ON interviews.job = jobs.id
+            WHERE
+                jobs.company_name ILIKE ${`%${query}%`} OR
+                jobs.job_title ILIKE ${`%${query}%`}
+            ORDER BY last_updated DESC
+            LIMIT ${INTERVIEWS_ITEMS_PER_PAGE} OFFSET ${offset}
+        `;
+
+        return interviews;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch interviews.");
+    }
+};
+
+export async function fetchInterviewsPages(query: string | number) {
+    try {
+        const data = await sql`
+            SELECT COUNT(*)
+            FROM interviews
+            JOIN jobs ON interviews.job = jobs.id
+
+        `;
+
+        const totalPages = Math.ceil(Number(data[0].count) / INTERVIEWS_ITEMS_PER_PAGE);
+        return totalPages;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch total number of interviews.");
+    }
+};
+
+export async function fetchJobsForDropdown() {
+    try {
+        const jobs = await sql<InterviewJob[]>`
+            SELECT
+                id,
+                company_name,
+                job_title
+            FROM jobs;
+        `;
+
+        return jobs;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch jobs for interview dropdown.");
     }
 };

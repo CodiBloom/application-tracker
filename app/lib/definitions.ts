@@ -25,10 +25,34 @@ export type Interview = {
     interview_time: Date,
     job: number,
     contact: number,
-    interview_status: "upcoming" | "past" | null,
+    interview_status: "upcoming" | "past" | "cancelled",
 };
 
 export type Agency = {
     id: number,
     agency_name: string,
+};
+
+export type InterviewsTable = {
+    id: number,
+    interview_date: Date,
+    interview_time: Date,
+    interview_status: "upcoming" | "past" | "cancelled",
+    company_name: string,
+    job_title: string,
+};
+
+export type JobsTable = {
+    id: number,
+    company_name: string,
+    job_title: string,
+    status: "applied" | "rejected" | "scheduled" | "interviewed" | "offered",
+    applied_on: Date,
+    last_updated: Date,
+};
+
+export type InterviewJob = {
+    id: number,
+    company_name: string,
+    job_title: string,
 };

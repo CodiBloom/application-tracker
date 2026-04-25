@@ -33,8 +33,8 @@ export default async function JobsTable({
                                 </div>
                                 <div className="flex w-full items-center justify-between pt-4">
                                     <div>
-                                        <p>{formatDateToLocal(job.applied_on.toString())}</p>
-                                        <p>{formatDateToLocal(job.last_updated.toString())}</p>
+                                        <p>{job.applied_on.toDateString()}</p>
+                                        <p>{job.last_updated.toDateString()}</p>
                                     </div>
                                     <div className="flex justify-end gap-2">
                                         <UpdateJob id={job.id.toString()} />
@@ -82,10 +82,10 @@ export default async function JobsTable({
                                         {job.job_title}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-3">
-                                        {formatDateToLocal(job.applied_on.toString())}
+                                        {job.applied_on.toDateString()}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-3">
-                                        {formatDateToLocal(job.last_updated.toString())}
+                                        {job.last_updated.toDateString()}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-3">
                                         <JobStatus status={job.status} />
@@ -103,5 +103,5 @@ export default async function JobsTable({
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
